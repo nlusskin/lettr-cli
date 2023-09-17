@@ -1,26 +1,37 @@
 import React, { useState } from 'react'
 import { Text, Box, useInput } from 'ink'
+import { createLogin, verify } from './api.js'
 
 
 export default function Login() {
     enum lineModes {
         UNAME = 0,
-        METHOD = 1,
-        PWD = 2,
-        FINAL = 3
-    }
-    enum methods {
-        PWD = 0,
-        PIN = 1
+        PIN = 1,
+        FINAL = 2
     }
 
-    const [method, setMethod] = useState(methods.PWD)
     const [lineMode, setLineMode] = useState(lineModes.UNAME)
     const [usernameInputValue, setUsernameInputValue] = useState('')
     const [passwordInputValue, setPasswordInputValue] = useState('')
+    const [error, setError] = useState('')
 
-    useInput((input, key) => {
+    useInput(async (input, key) => {
         if (key.return) {
+            if (lineMode == lineModes.UNAME) {
+                let { error } = await createLogin(usernameInputValue)
+                if (error) {
+                    setError(error.message)
+                    return
+                }
+            }
+            if (lineMode == lineModes.PIN) {
+                let { error } = await verify(usernameInputValue, passwordInputValue)
+                if (error) {
+                    setError(error.message)
+                    return
+                }
+            }
+            
             if (lineMode != lineModes.FINAL) {
                 setLineMode(lineMode + 1)
                 return
@@ -35,12 +46,7 @@ export default function Login() {
             setUsernameInputValue(usernameInputValue + input)
         }
 
-        if (lineMode == lineModes.METHOD) {
-            if (key.leftArrow) { setMethod(method - (method == 1 ? 1 : -1)) }
-            if (key.rightArrow) { setMethod(method + (method == 0 ? 1 : -1)) }
-        }
-
-        if (lineMode == lineModes.PWD) {
+        if (lineMode == lineModes.PIN) {
             if (key.backspace || key.delete) {
                 setPasswordInputValue(passwordInputValue.slice(0, -1))
                 return
@@ -53,45 +59,26 @@ export default function Login() {
 	return (
         <Box flexDirection='column'>
             <Text>
-                Use your Mailbrew credentials to log in.
+                Enter your email to log in or create an account
             </Text>
 
             <Text>
-                Username: <Text color='green'>{usernameInputValue}</Text>
+                Email: <Text color='green'>{usernameInputValue}</Text>
             </Text>
 
             {lineMode > lineModes.UNAME &&
-                <Box>
-                    <Text>Sign in method: </Text>
-                    <Text
-                        color={method == methods.PWD ? 'green' : ''}
-                        underline={method == methods.PWD}
-                    >
-                        Password
-                    </Text>
-                    <Text> / </Text>
-                    <Text
-                        color={method == methods.PIN ? 'green' : ''}
-                        underline={method == methods.PIN}
-                    >
-                        Email Pin
-                    </Text>
-                </Box>
-            }
-
-            {lineMode > lineModes.METHOD &&
                 <Text>
-                    {method == methods.PWD && <Text>Password: </Text>}
-                    {method == methods.PIN && <Text>Pin from email: </Text>}
+                    <Text>Pin from email: </Text>
                      <Text color='green'>{passwordInputValue.replaceAll(/./g, '*')}</Text>
                 </Text>
             }
             
-            {lineMode > lineModes.PWD &&
+            {lineMode > lineModes.PIN &&
                 <Text>
                     Logging in...
                 </Text>
             }
+            {error && <Text>{error}</Text>}
         </Box>
 	)
 }

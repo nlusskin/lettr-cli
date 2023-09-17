@@ -4,6 +4,7 @@ import {render} from 'ink'
 import meow from 'meow'
 import App from './app.js'
 
+
 // @ts-ignore
 const cli = meow(
 	`
