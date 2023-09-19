@@ -1,23 +1,36 @@
 import 'dotenv/config'
 import React, { useEffect, useState } from 'react'
-import { Text, Box } from 'ink'
+import { Box, Text } from 'ink'
+import { AppContext, AppContextType } from './appContext.js'
 import Login from './login.js'
 import List from './list.js'
 import { getUser } from './api.js'
 
-type Props = { }
+export default function App() {
+	const [appContext, _setAppContext] = useState({} as AppContextType)
+	function setAppContext(new_ctx: Partial<AppContextType>) {
+		let ex_ctx = { ...appContext }
+		Object.assign(ex_ctx, new_ctx)
+		_setAppContext(ex_ctx)
+		return new_ctx
+	}
 
-export default function App({}: Props) {
-	const [user, setUser] = useState(false as any)
 	useEffect(() => {
-		getUser().then(data => setUser(data))
+		setAppContext({ loading: true })
+		getUser().then(async data => {
+			if (data.data.session) {
+				setAppContext({ user: data.data.session, loading: false })
+			}
+		})
 	}, [])
 
 	return (
-		<Box>
-			<Text></Text>
-			{ !user && <Login /> }
-			{ user && <List /> }
-		</Box>
+		<AppContext.Provider value={{ appContext, setAppContext }}>
+			<Box>
+				{ appContext.loading && <Text>...</Text>}
+				{ !appContext.loading && !appContext.user && <Login /> }
+				{ appContext.user && <List /> }
+			</Box>
+		</AppContext.Provider>
 	)
 }

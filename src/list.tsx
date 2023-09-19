@@ -1,12 +1,20 @@
-import React, { useEffect, useState } from 'react'
-import { Box, useInput } from 'ink'
+import { AppContext } from './appContext.js'
+import React, { useEffect, useState, useContext } from 'react'
+import { Text, Box, useInput } from 'ink'
 import Row from './row.js'
+import Read from './read.js'
+import { fetchMessageList, MessageType } from './api.js'
 
 
 export default function List() {
+    const { appContext, setAppContext } = useContext(AppContext)
     const [focus, setFocus] = useState(0)
 
     useInput((input, key) => {
+        if (key.return) {
+            setAppContext({ read: items[focus] })
+        }
+
         if (key.downArrow) {
             if (focus < items.length - 1) {
                 setFocus(focus + 1)
@@ -31,7 +39,7 @@ export default function List() {
         }
     })
 
-    const [items, setItems] = useState([] as ListItemType[])
+    const [items, setItems] = useState([] as MessageType[])
 	useEffect(() => {
 		(async () => {
 			let listResponse = await getItems()
@@ -39,33 +47,26 @@ export default function List() {
 		})()
 	}, [])
 
+    if (!items || items.length == 0) {
+        return (
+            <Text>When you get your first email it will show up here</Text>
+        )
+    }
+
 	return (
-		<Box flexDirection='column'>
-			{items.map((v,i) => <Row title={v.title} key={i} highlight={focus == i} />)}
-		</Box>
+		<>
+            { !appContext.read && <Box flexDirection='column'>
+                <Text>{'Hi, ' + appContext.user.user.email}</Text>
+                {items.map((v,i) => <Row title={v.subject} key={i} highlight={focus == i} />)}
+            </Box>
+            }
+            { appContext.read && <Read /> }
+        </>
 	)
 }
 
 async function getItems(cursor=0) {
-    if (cursor != 0) return [] as ListItemType[]
-
-    return [
-        {
-            title: 'Sample title 1',
-            link: 'https://'
-        },
-        {
-            title: 'Sample title 2',
-            link: 'https://'
-        },
-        {
-            title: 'Sample title 3',
-            link: 'https://'
-        }
-    ] as ListItemType[]
-}
-
-type ListItemType = {
-    title: string
-    link: string
+    if (cursor != 0) return [] as MessageType[]
+    let msgs = await fetchMessageList()
+    return msgs.data
 }

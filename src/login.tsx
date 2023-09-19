@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import { Text, Box, useInput } from 'ink'
-import { createLogin, verify } from './api.js'
+import { createLogin, verify, createUser } from './api.js'
+import { AppContext } from './appContext.js'
 
 
 export default function Login() {
@@ -10,6 +11,7 @@ export default function Login() {
         FINAL = 2
     }
 
+    const { setAppContext } = useContext(AppContext)
     const [lineMode, setLineMode] = useState(lineModes.UNAME)
     const [usernameInputValue, setUsernameInputValue] = useState('')
     const [passwordInputValue, setPasswordInputValue] = useState('')
@@ -25,11 +27,13 @@ export default function Login() {
                 }
             }
             if (lineMode == lineModes.PIN) {
-                let { error } = await verify(usernameInputValue, passwordInputValue)
-                if (error) {
-                    setError(error.message)
+                let { data, error } = await verify(usernameInputValue, passwordInputValue)
+                if (error || data.session == null) {
+                    setError(error && error.message || 'Could not log in')
                     return
                 }
+                await createUser()
+                setAppContext({ user: data.session })
             }
             
             if (lineMode != lineModes.FINAL) {

@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import storage from './storageProvider.js'
 const supabase = createClient(process.env['SUPABASE_URL']!, process.env['SUPABASE_ANON_KEY']!, { auth: { storage } })
-
+const apiUrl = process.env['API_URL']!
 
 export async function getUser() {
     return await supabase.auth.getSession()
@@ -20,5 +20,51 @@ export async function createLogin(email: string) {
 export async function verify(email: string, token: string) {
   const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email'})
 
+  if (!error && data.user) {
+    supabase.from('users')
+        .upsert({
+            email: data.user.email,
+
+        }, {
+            onConflict: 'email'
+        })
+  }
+
   return { data, error }
+}
+
+export async function createUser() {
+    let session = await getUser()
+    let res = await fetch(apiUrl + '/user/create', {
+        headers: {
+            'Authorization': session.data.session?.access_token || ''
+        },
+        method: 'POST'
+    })
+    return await res.json()
+}
+
+export async function fetchMessageList() {
+    let session = await getUser()
+    let res = await fetch(apiUrl + '/mail/list', {
+        headers: {
+            'Authorization': session.data.session?.access_token || ''
+        },
+        method: 'GET'
+    })
+    return await res.json() as ApiResponse<MessageType[]>
+}
+
+export { supabase }
+
+type ApiResponse<T> = {
+    success: boolean
+    data: T
+}
+export interface MessageType {
+    id: string
+    subject: string
+    receivedAt: Date
+    textSignedUrl: string
+    htmlSignedUrl: string
 }
