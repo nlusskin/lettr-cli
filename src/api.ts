@@ -44,15 +44,40 @@ export async function createUser() {
     return await res.json()
 }
 
-export async function fetchMessageList() {
+export async function fetchMessageList(tag?: 'archived') {
     let session = await getUser()
-    let res = await fetch(apiUrl + '/mail/list', {
+    let res = await fetch(apiUrl + '/mail/list' + (tag ? `?tag=${tag}` : ''), {
+        method: 'GET',
+        headers: {
+            'Authorization': session.data.session?.access_token || ''
+        }
+    })
+    return await res.json() as ApiResponse<MessageType[]>
+}
+
+export async function archiveMessage(id: string) {
+    let session = await getUser()
+    let res = await fetch(apiUrl + '/mail/' + id, {
         headers: {
             'Authorization': session.data.session?.access_token || ''
         },
-        method: 'GET'
+        method: 'PATCH',
+        body: `{
+            "action": "archive"
+        }`
     })
-    return await res.json() as ApiResponse<MessageType[]>
+    return await res.json()
+}
+
+export async function deleteMessage(id: string) {
+    let session = await getUser()
+    let res = await fetch(apiUrl + '/mail/' + id, {
+        headers: {
+            'Authorization': session.data.session?.access_token || ''
+        },
+        method: 'DELETE'
+    })
+    return await res.json()
 }
 
 export { supabase }

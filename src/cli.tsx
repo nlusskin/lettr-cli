@@ -8,13 +8,13 @@ import App from './app.js'
 const cli = meow(
 	`
 	Usage
-	  $ nltr
+	  $ lttr
 
 	Options
 		--
 
 	Examples
-	  $ nltr
+	  $ lttr
 `,
 	{
 		importMeta: import.meta,

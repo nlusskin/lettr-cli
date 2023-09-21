@@ -8,6 +8,7 @@ import { getUser } from './api.js'
 
 export default function App() {
 	const [appContext, _setAppContext] = useState({} as AppContextType)
+
 	function setAppContext(new_ctx: Partial<AppContextType>) {
 		let ex_ctx = { ...appContext }
 		Object.assign(ex_ctx, new_ctx)
@@ -20,6 +21,9 @@ export default function App() {
 		getUser().then(async data => {
 			if (data.data.session) {
 				setAppContext({ user: data.data.session, loading: false })
+			}
+			else {
+				setAppContext({ loading: false })
 			}
 		})
 	}, [])
