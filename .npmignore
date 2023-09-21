@@ -1,0 +1,8 @@
+.github
+.src
+.tests
+.editorconfig
+.git*
+.prettier*
+readme.md
+tsconfig.json

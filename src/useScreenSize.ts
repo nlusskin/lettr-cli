@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useStdout } from 'ink'
 
-interface ScreenSizeType {
+export interface ScreenSizeType {
   width: number
   height: number
 }

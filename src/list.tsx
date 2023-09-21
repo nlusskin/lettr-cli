@@ -116,10 +116,12 @@ export default function List() {
 
                 {items.map((v,i) => 
                     <Row
-                        title={v.subject}
+                        sender={v.Publication.name || v.Publication.fromEmail}
+                        subject={v.subject}
                         key={i}
                         highlight={focus == i}
                         action={focus == i ? onAction as 'a' | 'd' : null}
+                        screenSize={screenSize}
                     />)}
             </Box>
             }

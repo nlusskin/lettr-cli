@@ -92,4 +92,12 @@ export interface MessageType {
     receivedAt: Date
     textSignedUrl: string
     htmlSignedUrl: string
+    Publication: {
+        id: string
+        name?: string
+        fromEmail: string
+        logoUrl?: string
+        subscribeUrl?: string
+        description?: string
+    }
 }

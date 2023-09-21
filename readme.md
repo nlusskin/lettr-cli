@@ -1,9 +1,9 @@
-# lettr-cli
+# @lettr/cli
 
 ## Install
 
 ```bash
-$ npm install --global lettr-cli
+$ npm install --global @lettr/cli
 ```
 
 ## CLI

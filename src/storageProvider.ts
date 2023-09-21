@@ -6,19 +6,21 @@ import path from 'path'
 const appConfigPath = path.join(os.homedir(), '.config', 'lettr')
 const appConfigFile = path.join(os.homedir(), '.config', 'lettr', 'app.json')
 
-try {
-    await fs.access(appConfigPath, fsConstants.F_OK)
-} catch {
-    await fs.mkdir(appConfigPath, { recursive: true })
-}
+;(async function setup() {
+    try {
+        await fs.access(appConfigPath, fsConstants.F_OK)
+    } catch {
+        await fs.mkdir(appConfigPath, { recursive: true })
+    }
 
-try {
-    await fs.access(appConfigFile, fsConstants.F_OK)
-} catch (e) {
-    console.error(e)
-    console.log('writing config file to', appConfigFile)
-    await fs.writeFile(appConfigFile, '{}')
-}
+    try {
+        await fs.access(appConfigFile, fsConstants.F_OK)
+    } catch (e) {
+        console.error(e)
+        console.log('writing config file to', appConfigFile)
+        await fs.writeFile(appConfigFile, '{}')
+    }
+})()
 
 async function _readConfigFile() {
     try {
