@@ -18,6 +18,13 @@ export default function App() {
 
 	useEffect(() => {
 		setAppContext({ loading: true })
+		let appVersion = process.env['APP_VERSION']!
+		fetch(process.env['NPM_PACKAGE_URL']!).then(async data => {
+			let { version: releaseVersion } = await data.json()
+			if (appVersion != releaseVersion && appVersion != 'dev')
+				console.log(`Update available (${appVersion} → ${releaseVersion})`)
+				console.log('Update by running `npm update @lettr/cli`')
+		})
 		getUser().then(async data => {
 			if (data.data.session) {
 				setAppContext({ user: data.data.session, loading: false })

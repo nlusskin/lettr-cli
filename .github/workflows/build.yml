@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      version: ${{ github.ref }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,6 +21,13 @@ jobs:
         run: npm install
       - name: Build
         run: npm run build
+      - name: Create .env for dist
+        run: |
+          echo "BASE_URL=${{ vars.BASE_URL }}" >> dist/.env
+          echo "API_URL=${{ vars.API_URL }}" >> dist/.env
+          echo "SUPABASE_URL=${{ vars.SUPABASE_URL }}" >> dist/.env
+          echo "SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY }}" >> dist/.env
+          echo "APP_VERSION=${{ env.version }}" >> dist/.env
       - name: Publish
         run: npm publish --access=public
         env:
