@@ -24,8 +24,10 @@ export default function List() {
 
     const [items, setItems] = useState([] as MessageType[])
     const refreshMessageList = useCallback(async (tag?: Parameters<typeof fetchMessageList>[0]) => {
+        setAppContext({ 'loading': true })
         let msgs = await fetchMessageList(tag)
         setItems(msgs.data)
+        setAppContext({ 'loading': false })
     }, [items, setItems])
 
 	useEffect(() => {
@@ -106,11 +108,13 @@ export default function List() {
         }
     })
 
+    if (appContext.loading) return (
+        <></>
+    )
+
 	return (
 		<Box flexDirection='column' flexGrow={1}>
             { !appContext.read && <Box flexDirection='column'>
-                <Text>{'Hi, ' + appContext.user.user.email}</Text>
-                <Newline />
                 {!items || items.length == 0 &&
                 <Text>When you get your first email it will show up here</Text>}
 
@@ -118,6 +122,7 @@ export default function List() {
                     <Row
                         sender={v.Publication.name || v.Publication.fromEmail}
                         subject={v.subject}
+                        date={v.receivedAt}
                         key={i}
                         highlight={focus == i}
                         action={focus == i ? onAction as 'a' | 'd' : null}

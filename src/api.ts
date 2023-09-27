@@ -1,3 +1,4 @@
+import './env.js'
 import { createClient } from '@supabase/supabase-js'
 import storage from './storageProvider.js'
 const supabase = createClient(process.env['SUPABASE_URL']!, process.env['SUPABASE_ANON_KEY']!, { auth: { storage } })
@@ -42,6 +43,17 @@ export async function createUser() {
         method: 'POST'
     })
     return await res.json()
+}
+
+export async function fetchCurrentUser() {
+    let session = await getUser()
+    let res = await fetch(apiUrl + '/user/me', {
+        headers: {
+            'Authorization': session.data.session?.access_token || ''
+        },
+        method: 'GET'
+    })
+    return (await res.json()).data as ProfileType
 }
 
 export async function fetchMessageList(tag?: 'archived') {
@@ -100,4 +112,11 @@ export interface MessageType {
         subscribeUrl?: string
         description?: string
     }
+}
+
+export interface ProfileType {
+    id: string
+    email: string
+    fwdAddress: string
+    isProUntil: Date | null
 }

@@ -1,10 +1,11 @@
-import 'dotenv/config'
+import './env.js'
 import React, { useEffect, useState } from 'react'
 import { Box, Text } from 'ink'
 import { AppContext, AppContextType } from './appContext.js'
 import Login from './login.js'
 import List from './list.js'
 import { getUser } from './api.js'
+import Profile from './profile.js'
 
 export default function App() {
 	const [appContext, _setAppContext] = useState({} as AppContextType)
@@ -21,9 +22,10 @@ export default function App() {
 		let appVersion = process.env['APP_VERSION']!
 		fetch(process.env['NPM_PACKAGE_URL']!).then(async data => {
 			let { version: releaseVersion } = await data.json()
-			if (appVersion != releaseVersion && appVersion != 'dev')
+			if (appVersion != releaseVersion && appVersion != 'dev') {
 				console.log(`Update available (${appVersion} → ${releaseVersion})`)
-				console.log('Update by running `npm update @lettr/cli`')
+				console.log('Update by running `npm install -g @lettr/cli`')
+			}
 		})
 		getUser().then(async data => {
 			if (data.data.session) {
@@ -37,9 +39,10 @@ export default function App() {
 
 	return (
 		<AppContext.Provider value={{ appContext, setAppContext }}>
-			<Box>
+			<Box flexDirection='column'>
 				{ appContext.loading && <Text>...</Text>}
 				{ !appContext.loading && !appContext.user && <Login /> }
+				{ appContext.user && <Profile /> }
 				{ appContext.user && <List /> }
 			</Box>
 		</AppContext.Provider>

@@ -16,7 +16,6 @@ const appConfigFile = path.join(os.homedir(), '.config', 'lettr', 'app.json')
     try {
         await fs.access(appConfigFile, fsConstants.F_OK)
     } catch (e) {
-        console.error(e)
         console.log('writing config file to', appConfigFile)
         await fs.writeFile(appConfigFile, '{}')
     }
@@ -27,7 +26,6 @@ async function _readConfigFile() {
         let data = await fs.readFile(appConfigFile, { encoding: 'utf-8' })
         return JSON.parse(data)
     } catch (e) {
-        console.error('Could not read file', e)
         return null
     }
 }

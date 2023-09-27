@@ -23,11 +23,12 @@ jobs:
         run: npm run build
       - name: Create .env for dist
         run: |
+          echo "APP_VERSION=${{ env.version }}" >> dist/.env
           echo "BASE_URL=${{ vars.BASE_URL }}" >> dist/.env
           echo "API_URL=${{ vars.API_URL }}" >> dist/.env
           echo "SUPABASE_URL=${{ vars.SUPABASE_URL }}" >> dist/.env
           echo "SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY }}" >> dist/.env
-          echo "APP_VERSION=${{ env.version }}" >> dist/.env
+          echo "NPM_PACKAGE_URL=${{ vars.NPM_PACKAGE_URL }}" >> dist/.env
       - name: Publish
         run: npm publish --access=public
         env:
