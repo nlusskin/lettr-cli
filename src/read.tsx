@@ -16,6 +16,10 @@ export default function Read() {
 	useEffect(() => {
 		(async () => {
             if (!appContext.read) return
+			if (!appContext.read.textSignedUrl && appContext.read.htmlSignedUrl) {
+				setText(['This message was not delivered with a text version. To read in html, press \'o\''])
+				return
+			}
 			let res = await fetch(appContext.read.textSignedUrl)
             let rawText = await res.text()
 			const words = rawText.split(/\s/g)

@@ -4,6 +4,7 @@ import React from 'react'
 import { ScreenSizeType } from './useScreenSize.js'
 
 type Props = {
+	fkey: number
 	sender: string
 	subject: string
 	date: Date
@@ -27,7 +28,6 @@ export default function Row(p: Props) {
 	return (
 		<Box flexDirection='row'>
 			<Box flexShrink={1}>
-				{}
 				<Text>{displayDate(p.date)}</Text>
 				<Text>  </Text>
 				<Text backgroundColor='grey'>{p.sender.trim()}</Text>

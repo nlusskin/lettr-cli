@@ -39,12 +39,15 @@ export default function App() {
 
 	return (
 		<AppContext.Provider value={{ appContext, setAppContext }}>
-			<Box flexDirection='column'>
-				{ appContext.loading && <Text>...</Text>}
-				{ !appContext.loading && !appContext.user && <Login /> }
-				{ appContext.user && <Profile /> }
-				{ appContext.user && <List /> }
-			</Box>
+			{appContext.unmount && <></>}
+			{!appContext.unmount && 
+				<Box flexDirection='column'>
+					{ appContext.loading && <Text>...</Text>}
+					{ !appContext.loading && !appContext.user && <Login /> }
+					{ appContext.user && <Profile /> }
+					{ appContext.user && <List /> }
+				</Box>
+			}
 		</AppContext.Provider>
 	)
 }

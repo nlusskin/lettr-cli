@@ -53,7 +53,7 @@ export async function fetchCurrentUser() {
         },
         method: 'GET'
     })
-    return (await res.json()).data as ProfileType
+    return await res.json() as ProfileType
 }
 
 export async function fetchMessageList(tag?: 'archived') {

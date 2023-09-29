@@ -3,19 +3,17 @@ import open from 'open'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { MessageType, archiveMessage, deleteMessage, fetchMessageList } from './api.js'
 import { AppContext } from './appContext.js'
+import _ from 'lodash'
 import Read from './read.js'
 import Row from './row.js'
 import { useScreenSize } from './useScreenSize.js'
-import { useClear } from './useClear.js'
 
 export default function List() {
     const { appContext, setAppContext } = useContext(AppContext)
     const [focus, setFocus] = useState(0)
     const [view, setView] = useState(null as typeof onAction)
     const [onAction, setAction] = useState(null as 'a'|'d'|'g'|null)
-    const screenSize = useScreenSize(); screenSize
-    // @ts-ignore
-    const clear = useClear()
+    const screenSize = useScreenSize()
     const tags = {
         a: 'archived',
         d: 'deleted',
@@ -23,12 +21,20 @@ export default function List() {
     }
 
     const [items, setItems] = useState([] as MessageType[])
+
     const refreshMessageList = useCallback(async (tag?: Parameters<typeof fetchMessageList>[0]) => {
         setAppContext({ 'loading': true })
         let msgs = await fetchMessageList(tag)
         setItems(msgs.data)
         setAppContext({ 'loading': false })
     }, [items, setItems])
+
+    function removeCurrentFocusFromList() {
+        let newItemList = [...items]
+        _.pullAt(newItemList, [focus])
+        setItems(newItemList)
+        setAction(null)
+    }
 
 	useEffect(() => {
 		(async () => {
@@ -37,18 +43,9 @@ export default function List() {
 		})()
 	}, [view])
 
-    function removeCurrentFocusFromList() {
-        let newItemList = [...items]
-        delete newItemList[focus]
-        setItems(newItemList)
-        setAction(null)
-        setFocus(focus - 1)
-    }
-
     useInput((input, key) => {
         if (key.escape) {
             setAppContext({ read: null })
-            //clear()
             setView(null)
         }
 
@@ -104,6 +101,8 @@ export default function List() {
                 refreshMessageList()
                 break
             case 'q':
+                setAppContext({ unmount: true })
+                setTimeout(() => process.exit(0), 0)
                 break
         }
     })
@@ -116,7 +115,7 @@ export default function List() {
 		<Box flexDirection='column' flexGrow={1}>
             { !appContext.read && <Box flexDirection='column'>
                 {!items || items.length == 0 &&
-                <Text>When you get your first email it will show up here</Text>}
+                <Text>When you get your first email, it will show up here</Text>}
 
                 {items.map((v,i) => 
                     <Row
@@ -124,6 +123,7 @@ export default function List() {
                         subject={v.subject}
                         date={v.receivedAt}
                         key={i}
+                        fkey={i}
                         highlight={focus == i}
                         action={focus == i ? onAction as 'a' | 'd' : null}
                         screenSize={screenSize}
@@ -144,7 +144,7 @@ export default function List() {
                     ].map(a => <Text key={a}>{a}</Text>) }
                     { appContext.read != null && <Text>[esc] return to list   </Text>}
                     { appContext.read == null && <Text>[r]efresh   </Text>}
-                    <Text>[^-c]quit]</Text>
+                    <Text>[q]uit</Text>
                 </Text>
             </Box>
         </Box>

@@ -1,9 +1,11 @@
 import { Text, Box, Newline } from 'ink'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { ProfileType, fetchCurrentUser } from './api.js'
+import { AppContext } from './appContext.js'
 
 
 export default function Profile() {
+    const { appContext } = useContext(AppContext)
     const [profile, setProfile] = useState<ProfileType>()
 
     useEffect(() => {
@@ -12,7 +14,7 @@ export default function Profile() {
         })
     }, [])
 
-    if (!profile) return
+    if (!profile || appContext.loading) return
 
 	return (
 		<Box>

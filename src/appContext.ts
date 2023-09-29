@@ -22,5 +22,6 @@ function setAppContext(
 export interface AppContextType {
     user: Session
     loading: boolean
+    unmount: boolean
     read: MessageType | null
 }
