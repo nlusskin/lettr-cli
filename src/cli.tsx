@@ -11,14 +11,29 @@ const cli = meow(
 	Usage
 	  $ lettr <cmd>
 
-	Options
-		--
+	Commands
+		update
+			update the app to the latest version from npm
 
-	Examples
-	  $ lettr
-	  	run the app
-	  $ lettr update
-	  	update the app to the latest version on npm
+	Options
+		--help
+			show this help
+
+	Navigation
+		[a] - archive a message
+		[d] - delete a message
+		[o] - open the html version of a message in the browser
+		[r] - refresh the message list
+		[g+a] - go to the archived message list
+		[esc] - return to the main list or clear a command
+		[l] - open your account settings in the browser
+		[q] - quit the app
+
+	Account
+		You can update your account in the browser
+			- Subscribe to the pro version
+			- Change your username (forwarding address)
+			- View and edit your stacks
 `,
 	{
 		importMeta: import.meta,

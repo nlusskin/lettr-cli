@@ -1,7 +1,7 @@
 import { Box, Newline, Spacer, Text, useInput } from 'ink'
 import open from 'open'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { MessageType, archiveMessage, deleteMessage, fetchMessageList } from './api.js'
+import { MessageType, archiveMessage, deleteMessage, fetchMessageList, getUser } from './api.js'
 import { AppContext } from './appContext.js'
 import _ from 'lodash'
 import Read from './read.js'
@@ -92,6 +92,11 @@ export default function List() {
                 break
             case 'g':
                 setAction('g')
+                break
+            case 'l':
+                getUser().then(session => {
+                    open(process.env['BASE_URL']! + '/account/login?t=' + session.data.session?.access_token)
+                })
                 break
             case 'o':
                 let signedUrl = btoa(items[focus]!.htmlSignedUrl)

@@ -24,7 +24,7 @@ export default function App() {
 			let { version: releaseVersion } = await data.json()
 			if (appVersion != releaseVersion && appVersion != 'dev') {
 				console.log(`Update available (${appVersion} → ${releaseVersion})`)
-				console.log('Update by running `npm install -g @lettr/cli`')
+				console.log('Update by running `lettr update`')
 			}
 		})
 		getUser().then(async data => {
