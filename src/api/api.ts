@@ -1,6 +1,6 @@
-import './env.js'
+import '../lib/env.js'
 import { createClient } from '@supabase/supabase-js'
-import storage from './storageProvider.js'
+import storage from '../lib/storageProvider.js'
 const supabase = createClient(process.env['SUPABASE_URL']!, process.env['SUPABASE_ANON_KEY']!, { auth: { storage } })
 const apiUrl = process.env['API_URL']!
 

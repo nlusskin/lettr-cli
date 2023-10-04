@@ -1,7 +1,7 @@
 import { Text, Box, Newline } from 'ink'
 import React, { useEffect, useContext } from 'react'
-import { fetchCurrentUser } from './api.js'
-import { AppContext } from './appContext.js'
+import { fetchCurrentUser } from '../api/api.js'
+import { AppContext } from '../lib/appContext.js'
 
 
 export default function Profile() {

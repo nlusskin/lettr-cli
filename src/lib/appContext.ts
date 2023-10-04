@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 import { Session } from '@supabase/supabase-js'
-import { MessageType, ProfileType } from './api.js'
+import { MessageType, ProfileType } from '../api/api.js'
 
 export const AppContext = createContext({
     appContext: {} as AppContextType,

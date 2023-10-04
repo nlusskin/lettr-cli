@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { Text, Box, useInput } from 'ink'
-import { createLogin, verify, createUser } from './api.js'
-import { AppContext } from './appContext.js'
+import { createLogin, verify, createUser } from '../api/api.js'
+import { AppContext } from '../lib/appContext.js'
 
 
 export default function Login() {

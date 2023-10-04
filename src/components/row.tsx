@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { Text, Box } from 'ink'
 import React from 'react'
-import { ScreenSizeType } from './useScreenSize.js'
+import { ScreenSizeType } from '../lib/useScreenSize.js'
 
 type Props = {
 	fkey: number

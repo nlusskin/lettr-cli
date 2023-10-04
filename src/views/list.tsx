@@ -1,11 +1,11 @@
 import { Box, Newline, Spacer, Text, useInput } from 'ink'
 import open from 'open'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { archiveMessage, deleteMessage, fetchMessageList, getUser } from './api.js'
-import { AppContext } from './appContext.js'
+import { archiveMessage, deleteMessage, fetchMessageList, getUser } from '../api/api.js'
+import { AppContext } from '../lib/appContext.js'
 import _ from 'lodash'
-import Row from './row.js'
-import { useScreenSize } from './useScreenSize.js'
+import Row from '../components/row.js'
+import { useScreenSize } from '../lib/useScreenSize.js'
 
 export default function List() {
     const { appContext, setAppContext } = useContext(AppContext)

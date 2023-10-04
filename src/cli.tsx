@@ -3,7 +3,7 @@ import { exec } from 'child_process'
 import { Text, render, useApp } from 'ink'
 import meow from 'meow'
 import React, { useEffect, useState } from 'react'
-import App from './app.js'
+import App from './views/app.js'
 
 // @ts-ignore
 const cli = meow(

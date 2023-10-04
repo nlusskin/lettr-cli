@@ -1,7 +1,7 @@
-import { AppContext } from './appContext.js'
+import { AppContext } from '../lib/appContext.js'
 import React, { useEffect, useState, useContext } from 'react'
 import { Box, Text, useInput,  } from 'ink'
-import { useScreenSize } from './useScreenSize.js'
+import { useScreenSize } from '../lib/useScreenSize.js'
 //import { marked } from 'marked'
 //import TerminalRenderer from 'marked-terminal'
 

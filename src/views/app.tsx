@@ -1,11 +1,11 @@
-import './env.js'
+import '../lib/env.js'
 import React, { useEffect, useState } from 'react'
 import { Box, Text } from 'ink'
-import { AppContext, AppContextType } from './appContext.js'
+import { AppContext, AppContextType } from '../lib/appContext.js'
 import Login from './login.js'
 import List from './list.js'
-import { getUser } from './api.js'
-import Profile from './profile.js'
+import { getUser } from '../api/api.js'
+import Profile from '../components/profile.js'
 import Read from './read.js'
 
 export default function App() {
