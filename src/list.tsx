@@ -1,57 +1,53 @@
 import { Box, Newline, Spacer, Text, useInput } from 'ink'
 import open from 'open'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { MessageType, archiveMessage, deleteMessage, fetchMessageList, getUser } from './api.js'
+import { archiveMessage, deleteMessage, fetchMessageList, getUser } from './api.js'
 import { AppContext } from './appContext.js'
 import _ from 'lodash'
-import Read from './read.js'
 import Row from './row.js'
 import { useScreenSize } from './useScreenSize.js'
 
 export default function List() {
     const { appContext, setAppContext } = useContext(AppContext)
+    const [loading, setLoading] = useState(false)
     const [focus, setFocus] = useState(0)
-    const [view, setView] = useState(null as typeof onAction)
-    const [onAction, setAction] = useState(null as 'a'|'d'|'g'|null)
+    const [view, setView] = useState('inbox' as 'inbox'|'archived')
+    const [onAction, setAction] = useState(null as 'archive'|'delete'|'g'|null)
     const screenSize = useScreenSize()
-    const tags = {
-        a: 'archived',
-        d: 'deleted',
-        g: ''
-    }
+    const items = appContext.list?.[view] || []
 
-    const [items, setItems] = useState([] as MessageType[])
-
-    const refreshMessageList = useCallback(async (tag?: Parameters<typeof fetchMessageList>[0]) => {
-        setAppContext({ 'loading': true })
+    const refreshMessageList = useCallback(async (tag: typeof view) => {
+        setLoading(true)
         let msgs = await fetchMessageList(tag)
-        setItems(msgs.data)
-        setAppContext({ 'loading': false })
-    }, [items, setItems])
+        let newCtx = { list: { ...appContext.list, [tag]: msgs.data } }
+        setAppContext(newCtx)
+        setLoading(false)
+    }, [appContext])
 
     function removeCurrentFocusFromList() {
         let newItemList = [...items]
         _.pullAt(newItemList, [focus])
-        setItems(newItemList)
+        setAppContext({ list: { ...appContext.list, [view]: newItemList} })
         setAction(null)
     }
 
 	useEffect(() => {
 		(async () => {
+            if (appContext.list?.[view]) return
             // @TODO: make this dynamic
-			await refreshMessageList(tags[view!] as 'archived')
+			await refreshMessageList(view)
 		})()
 	}, [view])
 
     useInput((input, key) => {
         if (key.escape) {
-            setAppContext({ read: null })
-            setView(null)
+            setView('inbox')
+            setAction(null)
         }
 
         if (key.return) {
             setAction(null)
-            setAppContext({ read: items[focus] })
+            setAppContext({ read: appContext.list[view][focus] })
         }
 
         if (key.downArrow) {
@@ -70,28 +66,34 @@ export default function List() {
         switch(input) {
             case 'a':
                 if (onAction == 'g') {
-                    setView('a')
+                    setView('archived')
                     setAction(null)
+                    setFocus(0)
                 }
-                else if (onAction == 'a') {
+                else if (onAction == 'archive') {
                     archiveMessage(items[focus]!.id)
                     removeCurrentFocusFromList()
                 }
                 else {
-                    setAction('a')
+                    setAction('archive')
                 }
                 break
             case 'd':
-                if (onAction == 'd') {
+                if (onAction == 'delete') {
                     deleteMessage(items[focus]!.id)
                     removeCurrentFocusFromList()
                 }
                 else {
-                    setAction('d')
+                    setAction('delete')
                 }
                 break
             case 'g':
                 setAction('g')
+                break
+            case 'i':
+                if (onAction == 'g') {
+                    setView('inbox')
+                }
                 break
             case 'l':
                 getUser().then(session => {
@@ -103,7 +105,7 @@ export default function List() {
                 open(process.env['BASE_URL']! + '/view?m=' + signedUrl)
                 break
             case 'r':
-                refreshMessageList()
+                refreshMessageList(view)
                 break
             case 'q':
                 setAppContext({ unmount: true })
@@ -112,8 +114,8 @@ export default function List() {
         }
     })
 
-    if (appContext.loading) return (
-        <></>
+    if (loading) return (
+        <Text>...</Text>
     )
 
 	return (
@@ -122,7 +124,7 @@ export default function List() {
                 {!items || items.length == 0 &&
                 <Text>When you get your first email, it will show up here</Text>}
 
-                {items.map((v,i) => 
+                {items && items.map((v,i) => 
                     <Row
                         sender={v.Publication.name || v.Publication.fromEmail}
                         subject={v.subject}
@@ -130,12 +132,11 @@ export default function List() {
                         key={i}
                         fkey={i}
                         highlight={focus == i}
-                        action={focus == i ? onAction as 'a' | 'd' : null}
+                        action={focus == i ? onAction as Exclude<typeof onAction, 'g'> : null}
                         screenSize={screenSize}
                     />)}
             </Box>
             }
-            { appContext.read != null && <Read /> }
             <Newline />
             <Spacer />
             <Box width='100%' flexDirection='row' flexGrow={1} columnGap={4}>

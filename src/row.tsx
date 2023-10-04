@@ -9,14 +9,14 @@ type Props = {
 	subject: string
 	date: Date
     highlight?: boolean
-	action: 'a'|'d'|null
+	action: 'archive'|'delete'|null
 	screenSize: ScreenSizeType
 }
 
 export default function Row(p: Props) {
-	const actionMap = {
-		a: 'archive',
-		d: 'delete'
+	const keyMap = {
+		archive: 'a',
+		delete: 'd'
 	}
 	
 	let subjectLength = p.subject.length
@@ -30,12 +30,12 @@ export default function Row(p: Props) {
 			<Box flexShrink={1}>
 				<Text>{displayDate(p.date)}</Text>
 				<Text>  </Text>
-				<Text backgroundColor='grey'>{p.sender.trim()}</Text>
+				<Text backgroundColor='grey'>{p.sender.trim() || '???'}</Text>
 			</Box>
 			<Box flexWrap='nowrap'>
 				<Text>  </Text>
 				<Text backgroundColor={p.highlight ? 'green' : ''}>
-					{p.action == null ? subject : `Press ${p.action} again to confirm ${actionMap[p.action]}`}
+					{p.action == null ? subject : `Press ${keyMap[p.action]} again to confirm ${p.action}`}
 				</Text>
 			</Box>
 		</Box>

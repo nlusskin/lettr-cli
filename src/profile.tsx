@@ -1,26 +1,27 @@
 import { Text, Box, Newline } from 'ink'
-import React, { useEffect, useState, useContext } from 'react'
-import { ProfileType, fetchCurrentUser } from './api.js'
+import React, { useEffect, useContext } from 'react'
+import { fetchCurrentUser } from './api.js'
 import { AppContext } from './appContext.js'
 
 
 export default function Profile() {
-    const { appContext } = useContext(AppContext)
-    const [profile, setProfile] = useState<ProfileType>()
+    const { appContext, setAppContext } = useContext(AppContext)
 
     useEffect(() => {
+        if (appContext.profile) return
+
         fetchCurrentUser().then(data => {
-            setProfile(data)
+            setAppContext({ profile: data })
         })
     }, [])
 
-    if (!profile || appContext.loading) return
+    if (!appContext.profile) return
 
 	return (
 		<Box>
-			<Text>{'Hi, ' + profile.email }</Text>
+			<Text>{'Hi, ' + appContext.profile.email }</Text>
             <Text>  </Text>
-			<Text>{'Your forwarding address is: ' + profile.fwdAddress}</Text>
+			<Text>{'Your forwarding address is: ' + appContext.profile.fwdAddress}</Text>
             <Newline />
 		</Box>
 	)

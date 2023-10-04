@@ -56,7 +56,7 @@ export async function fetchCurrentUser() {
     return await res.json() as ProfileType
 }
 
-export async function fetchMessageList(tag?: 'archived') {
+export async function fetchMessageList(tag?: 'inbox'|'archived') {
     let session = await getUser()
     let res = await fetch(apiUrl + '/mail/list' + (tag ? `?tag=${tag}` : ''), {
         method: 'GET',

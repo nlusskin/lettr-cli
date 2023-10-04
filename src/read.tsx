@@ -1,18 +1,20 @@
 import { AppContext } from './appContext.js'
 import React, { useEffect, useState, useContext } from 'react'
-import { Box, Text,  } from 'ink'
+import { Box, Text, useInput,  } from 'ink'
 import { useScreenSize } from './useScreenSize.js'
 //import { marked } from 'marked'
 //import TerminalRenderer from 'marked-terminal'
 
 export default function Read() {
-    const { appContext } = useContext(AppContext)
+    const { appContext, setAppContext } = useContext(AppContext)
 	const screenSize = useScreenSize()
+
+	const [renderedText, setRenderedText] = useState(['...'])
+	const [slice, setSlice] = useState(0)
+	const [text, setText] = useState([''])
     // @ts-ignore
     //marked.setOptions({ renderer: new TerminalRenderer() })
 
-    const [text, setText] = useState([''])
-    const [renderedText, setRenderedText] = useState(['...'])
 	useEffect(() => {
 		(async () => {
             if (!appContext.read) return
@@ -22,6 +24,7 @@ export default function Read() {
 			}
 			let res = await fetch(appContext.read.textSignedUrl)
             let rawText = await res.text()
+			rawText = rawText.replaceAll(/(^\W+[\n\r]){2,}|[\n\r]{3,}/gm, '\n\n')
 			const words = rawText.split(/\s/g)
 			const lines = []
 			
@@ -30,11 +33,16 @@ export default function Read() {
 			for (let [idx, word] of words.entries()) {
 				
 				//console.log('*', word)
+
 				if (idx == words.length - 1) {
 					lines.push(line)
 					break
 				}
-				if (wc + words[idx + 1]!.length >= screenSize.width) {
+				if (word.search(/\n+/g) > -1) {
+					lines.push(word)
+					continue
+				}
+				if (wc + words[idx + 1]!.length >= screenSize.width - 8) {
 					lines.push(line)
 					wc = 0
 					line = word + ' '
@@ -49,10 +57,28 @@ export default function Read() {
 		})()
 	}, [])
 
+	
 	useEffect(() => {
-		let buffer = 8
-		setRenderedText(text.slice(0, screenSize.height - buffer))
-	}, [text])
+		let buffer = 12
+		setRenderedText(text.slice(slice, screenSize.height - buffer + slice))
+	}, [text, slice])
+
+	
+	useInput((_, key) => {
+		if (key.escape) {
+            setAppContext({ read: null })
+        }
+        if (key.downArrow) {
+            if (slice < text.length - screenSize.height) {
+                setSlice(slice + 1)
+            }
+        }
+        if (key.upArrow) {
+            if (slice > 0) {
+                setSlice(slice - 1)
+            }
+        }
+	})
 
 	return (
 		<Box flexDirection='column'>
