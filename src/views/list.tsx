@@ -1,16 +1,18 @@
 import { Box, Newline, Spacer, Text, useInput } from 'ink'
+import _ from 'lodash'
+import { exec } from 'node:child_process'
 import open from 'open'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { archiveMessage, deleteMessage, fetchMessageList, getUser } from '../api/api.js'
-import { AppContext } from '../lib/appContext.js'
-import _ from 'lodash'
 import Row from '../components/row.js'
+import { AppContext } from '../lib/appContext.js'
+import { cacheFile, checkCache, tmpPath } from '../lib/cache.js'
 import { useScreenSize } from '../lib/useScreenSize.js'
 
 export default function List() {
     const { appContext, setAppContext } = useContext(AppContext)
     const [loading, setLoading] = useState(false)
-    const [focus, setFocus] = useState(0)
+    const [focus, setFocus] = useState(appContext.list?.focus ?? 0)
     const [view, setView] = useState('inbox' as 'inbox'|'archived')
     const [onAction, setAction] = useState(null as 'archive'|'delete'|'g'|null)
     const screenSize = useScreenSize()
@@ -32,12 +34,29 @@ export default function List() {
     }
 
 	useEffect(() => {
-		(async () => {
-            if (appContext.list?.[view]) return
-            // @TODO: make this dynamic
-			await refreshMessageList(view)
-		})()
+        if (appContext.list?.[view]) return
+		refreshMessageList(view).then()
 	}, [view])
+
+    // cache files around the cursor
+    useEffect(() => {
+        for (var i=0; i<4; i++) {
+            if (focus + i > items.length - 1) break
+            let { id, htmlSignedUrl = null, textSignedUrl = null } = items[focus + i]!
+            let htmlPath = `${id}/msg.html`
+            let textPath = `${id}/msg.txt`
+            checkCache(htmlPath).then(exists => {
+                if (!exists && htmlSignedUrl) {
+                    fetch(htmlSignedUrl).then(async d => cacheFile(htmlPath, await d.text()))
+                }
+            })
+            checkCache(textPath).then(exists => {
+                if (!exists && textSignedUrl) {
+                    fetch(textSignedUrl).then(async d => cacheFile(textPath, await d.text()))
+                }
+            })
+        }
+	}, [focus, items])
 
     useInput((input, key) => {
         if (key.escape) {
@@ -47,7 +66,10 @@ export default function List() {
 
         if (key.return) {
             setAction(null)
-            setAppContext({ read: appContext.list[view][focus] })
+            setAppContext({
+                read: appContext.list[view][focus],
+                list: { ...appContext.list, focus }
+            })
         }
 
         if (key.downArrow) {
@@ -55,11 +77,17 @@ export default function List() {
             if (focus < items.length - 1) {
                 setFocus(focus + 1)
             }
+            if (focus == items.length - 1) {
+                setFocus(0)
+            }
         }
         if (key.upArrow) {
             setAction(null)
             if (focus > 0) {
                 setFocus(focus - 1)
+            }
+            if (focus == 0) {
+                setFocus(items.length - 1)
             }
         }
 
@@ -97,12 +125,15 @@ export default function List() {
                 break
             case 'l':
                 getUser().then(session => {
-                    open(process.env['BASE_URL']! + '/account/login?t=' + session.data.session?.access_token)
+                    open(process.env['BASE_URL']! + '/auth?t=' + session.data.session?.access_token)
                 })
                 break
             case 'o':
                 let signedUrl = btoa(items[focus]!.htmlSignedUrl)
                 open(process.env['BASE_URL']! + '/view?m=' + signedUrl)
+                break
+            case 'p':
+                exec(`qlmanage -p ${tmpPath}/${items[focus]!.id}/msg.html > /dev/null`)
                 break
             case 'r':
                 refreshMessageList(view)

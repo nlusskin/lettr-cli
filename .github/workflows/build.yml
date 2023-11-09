@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       version: ${{ github.ref_name }}
-      deployUrl: https://api.vercel.com/v6/deployments?app=lettr&limit=1
+      deployApiUrl: https://api.vercel.com/v6/deployments?app=lettr&limit=1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,7 +25,7 @@ jobs:
       - name: Create .env for dist
         run: |
           echo "APP_VERSION=${{ env.version }}" >> dist/.env
-          echo "API_URL=$(curl -sL '${{ env.deployUrl }}' -H 'Authorization: Bearer ${{ secrets.VERCEL_API_TOKEN }}' | jq -r '.deployments[0].url')/api" >> dist/.env
+          echo "API_URL=$(curl -sL '${{ env.deployApiUrl }}' -H 'Authorization: Bearer ${{ secrets.VERCEL_API_TOKEN }}' | jq -r '.deployments[0].url')/api" >> dist/.env
           echo "BASE_URL=${{ vars.BASE_URL }}" >> dist/.env
           echo "SUPABASE_URL=${{ vars.SUPABASE_URL }}" >> dist/.env
           echo "SUPABASE_ANON_KEY=${{ vars.SUPABASE_ANON_KEY }}" >> dist/.env

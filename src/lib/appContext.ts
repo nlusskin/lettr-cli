@@ -24,6 +24,6 @@ export interface AppContextType {
     profile: ProfileType
     loading: boolean
     unmount: boolean
-    list: { inbox: MessageType[], archived: MessageType[] }
+    list: { inbox: MessageType[], archived: MessageType[], focus: number }
     read: MessageType | null
 }
